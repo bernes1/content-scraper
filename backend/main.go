@@ -1,20 +1,40 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
 )
 
+type Creators struct {
+	Creators []Creators `json:"creators"`
+}
 type creator struct {
-	name string
-	url  string
+	Name string `json:"name"`
+	Url  string `json:"url"`
 }
 
 func main() {
-	creator := creator{name: "peter", url: "https://youtu.be/dQw4w9WgXcQ"}
-	downloadContent(creator.name, creator.url)
+	run()
+}
+func run() {
+	jsonfile, err := os.Open("config.json")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("opend json")
+	defer jsonfile.Close()
+
+	byteValue, _ := io.ReadAll(jsonfile)
+	var creators Creators
+
+	json.Unmarshal(byteValue, &creators)
+	for i := 0; i < len(creators.Creators); i++ {
+		downloadContent(creators.Creators[i].Name, creators.Creators[i].Url)
+	}
 }
 
 func newCreator(creatorName string) {
